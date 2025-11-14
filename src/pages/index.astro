@@ -1,0 +1,10 @@
+---
+import Layout from '../layouts/Layout.astro';
+import LoginForm from '../components/LoginForm.svelte';
+---
+
+<Layout title="École Interactive - Accueil">
+  <div class="flex min-h-[80vh] items-center justify-center">
+    <LoginForm client:load />
+  </div>
+</Layout>
