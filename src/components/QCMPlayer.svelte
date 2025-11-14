@@ -168,7 +168,7 @@
         🔄 Réessayer
       </button>
       <a
-        href={import.meta.env.BASE_URL + 'selection'}
+        href={`${import.meta.env.BASE_URL}selection`}
         class="rounded-xl bg-primary-500 px-8 py-4 text-xl font-bold text-white transition-all hover:bg-primary-600"
       >
         🏠 Choisir un autre QCM

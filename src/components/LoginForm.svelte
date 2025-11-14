@@ -10,7 +10,7 @@
     if (prenom.trim()) {
       setUser({ prenom: prenom.trim(), classe });
       // Redirection vers la page de sélection
-      window.location.href = import.meta.env.BASE_URL + 'selection';
+      window.location.href = `${import.meta.env.BASE_URL}selection`;
     }
   }
 </script>

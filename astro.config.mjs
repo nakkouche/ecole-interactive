@@ -5,7 +5,7 @@ import tailwind from '@astrojs/tailwind';
 // https://astro.build/config
 export default defineConfig({
   site: 'https://nakkouche.github.io',
-  base: '/ecole-interactive',
+  base: '/ecole-interactive/',
   integrations: [
     svelte(),
     tailwind()
