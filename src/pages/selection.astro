@@ -1,6 +1,5 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import MatiereCard from '../components/MatiereCard.svelte';
 import { loadAllQCMs, getMatieres } from '../lib/qcmParser';
 
 // Charger tous les QCM disponibles
@@ -15,15 +14,20 @@ const qcmsByMatiere = matieres.map((matiere) => ({
 
 // Icônes et couleurs par matière
 const matiereConfig: {
-  [key: string]: { icon: string; color: string };
+  [key: string]: { icon: string; colorClass: string };
 } = {
-  Mathématiques: { icon: '🔢', color: 'blue' },
-  Français: { icon: '📚', color: 'green' },
-  Sciences: { icon: '🔬', color: 'purple' },
-  Histoire: { icon: '🏛️', color: 'orange' },
-  Géographie: { icon: '🌍', color: 'pink' },
-  Anglais: { icon: '🇬🇧', color: 'yellow' },
+  Mathématiques: { icon: '🔢', colorClass: 'bg-blue-100 border-blue-300 hover:bg-blue-200' },
+  Français: { icon: '📚', colorClass: 'bg-green-100 border-green-300 hover:bg-green-200' },
+  Sciences: { icon: '🔬', colorClass: 'bg-purple-100 border-purple-300 hover:bg-purple-200' },
+  Histoire: { icon: '🏛️', colorClass: 'bg-orange-100 border-orange-300 hover:bg-orange-200' },
+  Géographie: { icon: '🌍', colorClass: 'bg-pink-100 border-pink-300 hover:bg-pink-200' },
+  Anglais: { icon: '🇬🇧', colorClass: 'bg-yellow-100 border-yellow-300 hover:bg-yellow-200' },
 };
+
+// Mapper la difficulté en étoiles
+function getDifficultyStars(difficulte: number): string {
+  return '⭐'.repeat(Math.min(difficulte, 5));
+}
 ---
 
 <Layout title="École Interactive - Choix de la matière">
@@ -52,20 +56,49 @@ const matiereConfig: {
           </p>
         </div>
       ) : (
-        <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <div class="space-y-10">
           {
             qcmsByMatiere.map(({ matiere, qcms }) => {
-              const config = matiereConfig[matiere] || { icon: '📖', color: 'blue' };
-              const firstQCMId = qcms[0]?.frontmatter.id;
+              const config = matiereConfig[matiere] || { icon: '📖', colorClass: 'bg-gray-100 border-gray-300 hover:bg-gray-200' };
               return (
-                <MatiereCard
-                  matiere={matiere}
-                  count={qcms.length}
-                  icon={config.icon}
-                  color={config.color}
-                  href={`${import.meta.env.BASE_URL}qcm/${firstQCMId}`}
-                  client:load
-                />
+                <div class="rounded-3xl bg-white p-8 shadow-lg">
+                  <div class="mb-6 flex items-center gap-4">
+                    <span class="text-5xl">{config.icon}</span>
+                    <div>
+                      <h2 class="text-3xl font-bold text-gray-800">{matiere}</h2>
+                      <p class="text-lg text-gray-600">{qcms.length} QCM disponible{qcms.length > 1 ? 's' : ''}</p>
+                    </div>
+                  </div>
+
+                  <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {
+                      qcms.map((qcm) => (
+                        <a
+                          href={`${import.meta.env.BASE_URL}qcm/${qcm.frontmatter.id}`}
+                          class={`block rounded-xl border-4 p-6 transition-all hover:scale-105 active:scale-95 ${config.colorClass}`}
+                        >
+                          <h3 class="mb-2 text-lg font-bold text-gray-800 line-clamp-2">
+                            {qcm.frontmatter.titre}
+                          </h3>
+                          <p class="mb-3 text-sm text-gray-600 line-clamp-2">
+                            {qcm.frontmatter.description}
+                          </p>
+                          <div class="flex flex-wrap gap-2 text-xs">
+                            <span class="rounded-full bg-white px-3 py-1 font-semibold text-gray-700">
+                              {qcm.frontmatter.niveau}
+                            </span>
+                            <span class="rounded-full bg-white px-3 py-1 font-semibold text-gray-700">
+                              {getDifficultyStars(qcm.frontmatter.difficulte)}
+                            </span>
+                            <span class="rounded-full bg-white px-3 py-1 font-semibold text-gray-700">
+                              {qcm.frontmatter.points} pts
+                            </span>
+                          </div>
+                        </a>
+                      ))
+                    }
+                  </div>
+                </div>
               );
             })
           }
