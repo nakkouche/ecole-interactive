@@ -108,7 +108,7 @@ function parseQuestions(content: string): QCMQuestion[] {
  * Charge tous les QCM disponibles
  */
 export async function loadAllQCMs(): Promise<QCM[]> {
-  const qcmModules = import.meta.glob('/content/qcm/*.md', { as: 'raw' });
+  const qcmModules = import.meta.glob('/content/qcm/*.md', { query: '?raw', import: 'default' });
   const qcms: QCM[] = [];
 
   for (const path in qcmModules) {
