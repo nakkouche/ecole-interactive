@@ -112,7 +112,7 @@ export async function loadAllQCMs(): Promise<QCM[]> {
   const qcms: QCM[] = [];
 
   for (const path in qcmModules) {
-    const content = await qcmModules[path]();
+    const content = await qcmModules[path]() as string;
     try {
       const qcm = parseQCM(content);
       qcms.push(qcm);

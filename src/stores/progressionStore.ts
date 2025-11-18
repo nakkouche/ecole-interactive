@@ -1,4 +1,4 @@
-import { writable } from 'svelte/store';
+import { writable, get } from 'svelte/store';
 
 export interface QCMResult {
   qcmId: string;
@@ -47,42 +47,31 @@ export function saveQCMResult(userId: string, result: QCMResult) {
 }
 
 export function getQCMHistory(userId: string, qcmId: string): QCMResult[] {
-  let history: QCMResult[] = [];
-  progressionStore.subscribe((progression) => {
-    history = progression[userId]?.[qcmId] || [];
-  })();
-  return history;
+  const progression = get(progressionStore);
+  return progression[userId]?.[qcmId] || [];
 }
 
 export function getUserStats(userId: string) {
-  let stats = {
-    totalQCMs: 0,
-    totalQuestions: 0,
-    correctAnswers: 0,
-    averageScore: 0,
-  };
+  const progression = get(progressionStore);
+  const userProgression = progression[userId] || {};
+  const allResults = Object.values(userProgression).flat();
 
-  progressionStore.subscribe((progression) => {
-    const userProgression = progression[userId] || {};
-    const allResults = Object.values(userProgression).flat();
-
-    stats.totalQCMs = allResults.length;
-    stats.totalQuestions = allResults.reduce(
+  return {
+    totalQCMs: allResults.length,
+    totalQuestions: allResults.reduce(
       (sum, result) => sum + result.reponses.length,
       0
-    );
-    stats.correctAnswers = allResults.reduce(
+    ),
+    correctAnswers: allResults.reduce(
       (sum, result) => sum + result.reponses.filter((r) => r.correct).length,
       0
-    );
-    stats.averageScore =
+    ),
+    averageScore:
       allResults.length > 0
         ? allResults.reduce((sum, result) => sum + (result.score / result.maxScore) * 100, 0) /
           allResults.length
-        : 0;
-  })();
-
-  return stats;
+        : 0,
+  };
 }
 
 export function clearProgression() {
