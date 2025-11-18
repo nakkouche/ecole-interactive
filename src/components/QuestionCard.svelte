@@ -16,7 +16,7 @@
 
   function getOptionClass(index: number, option: QCMOption): string {
     const baseClass =
-      'w-full rounded-xl border-4 p-4 text-left text-lg transition-all cursor-pointer ';
+      'w-full rounded-xl border-4 p-4 text-left text-lg transition-all duration-200 cursor-pointer ';
 
     if (showResult) {
       if (option.isCorrect) {
@@ -29,7 +29,7 @@
     }
 
     if (index === selectedAnswer) {
-      return baseClass + 'bg-primary-100 border-primary-600 font-bold shadow-lg scale-[1.02] ring-2 ring-primary-300';
+      return baseClass + 'bg-primary-100 border-primary-600 font-bold shadow-xl scale-105 transform outline outline-4 outline-primary-400 outline-offset-2';
     }
 
     return baseClass + 'bg-white border-gray-300 hover:bg-gray-50 hover:border-gray-400';
