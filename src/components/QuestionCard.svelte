@@ -29,7 +29,7 @@
     }
 
     if (index === selectedAnswer) {
-      return baseClass + 'bg-secondary-100 border-secondary-500 font-semibold';
+      return baseClass + 'bg-primary-100 border-primary-600 font-bold shadow-lg scale-[1.02] ring-2 ring-primary-300';
     }
 
     return baseClass + 'bg-white border-gray-300 hover:bg-gray-50 hover:border-gray-400';
@@ -39,6 +39,9 @@
     if (showResult) {
       if (option.isCorrect) return '✅';
       if (index === selectedAnswer && !option.isCorrect) return '❌';
+    }
+    if (index === selectedAnswer && !showResult) {
+      return '✓';
     }
     return '';
   }
