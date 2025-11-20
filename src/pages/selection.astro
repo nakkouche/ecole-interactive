@@ -2,14 +2,23 @@
 import Layout from '../layouts/Layout.astro';
 import { loadAllQCMs, getMatieres } from '../lib/qcmParser';
 
+// Récupérer la matière sélectionnée depuis l'URL
+const selectedMatiere = Astro.url.searchParams.get('matiere');
+
 // Charger tous les QCM disponibles
 const allQCMs = await loadAllQCMs();
-const matieres = getMatieres(allQCMs);
+
+// Filtrer les QCM par matière si une matière est sélectionnée
+const filteredQCMs = selectedMatiere
+  ? allQCMs.filter((qcm) => qcm.frontmatter.matiere === selectedMatiere)
+  : allQCMs;
+
+const matieres = selectedMatiere ? [selectedMatiere] : getMatieres(allQCMs);
 
 // Grouper les QCM par matière
 const qcmsByMatiere = matieres.map((matiere) => ({
   matiere,
-  qcms: allQCMs.filter((qcm) => qcm.frontmatter.matiere === matiere),
+  qcms: filteredQCMs.filter((qcm) => qcm.frontmatter.matiere === matiere),
 }));
 
 // Icônes et couleurs par matière
@@ -30,19 +39,29 @@ function getDifficultyStars(difficulte: number): string {
 }
 ---
 
-<Layout title="École Interactive - Choix de la matière">
+<Layout title={`École Interactive - ${selectedMatiere || 'Sélection'}`}>
   <div class="mx-auto max-w-6xl">
     <div class="mb-12 text-center">
-      <h1 class="mb-4 text-5xl font-bold text-gray-800">Quelle matière veux-tu réviser ?</h1>
-      <p class="text-xl text-gray-600">Choisis une matière pour commencer à apprendre !</p>
+      <h1 class="mb-4 text-5xl font-bold text-gray-800">
+        {selectedMatiere ? `QCM de ${selectedMatiere}` : 'Quelle matière veux-tu réviser ?'}
+      </h1>
+      <p class="text-xl text-gray-600">
+        {selectedMatiere ? 'Choisis un QCM pour commencer !' : 'Choisis une matière pour commencer à apprendre !'}
+      </p>
     </div>
 
-    <div class="mb-8 text-center">
+    <div class="mb-8 text-center flex gap-4 justify-center">
+      <a
+        href={`${import.meta.env.BASE_URL}matieres`}
+        class="inline-block rounded-xl bg-gray-200 px-6 py-3 text-lg font-semibold text-gray-700 transition-all hover:bg-gray-300"
+      >
+        ← Retour aux matières
+      </a>
       <a
         href={import.meta.env.BASE_URL}
         class="inline-block rounded-xl bg-gray-200 px-6 py-3 text-lg font-semibold text-gray-700 transition-all hover:bg-gray-300"
       >
-        ← Changer d'utilisateur
+        👤 Changer d'utilisateur
       </a>
     </div>
 
