@@ -78,6 +78,7 @@
 
   $: allQuestionsAnswered = answers.every((answer) => answer !== null);
   $: currentQuestion = qcm.questions[currentQuestionIndex];
+  $: currentSelectedAnswer = answers[currentQuestionIndex];
 </script>
 
 <div class="mx-auto max-w-3xl">
@@ -105,7 +106,7 @@
       questionNumber={currentQuestionIndex + 1}
       question={currentQuestion.question}
       options={currentQuestion.options}
-      selectedAnswer={answers[currentQuestionIndex]}
+      selectedAnswer={currentSelectedAnswer}
       showResult={false}
       onSelectAnswer={handleSelectAnswer}
     />
