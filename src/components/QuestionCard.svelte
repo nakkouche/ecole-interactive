@@ -14,25 +14,16 @@
     }
   }
 
-  function getOptionClass(index: number, option: QCMOption): string {
-    const baseClass =
-      'w-full rounded-xl border-4 p-4 text-left text-lg transition-all duration-300 cursor-pointer ';
+  function isSelected(index: number): boolean {
+    return index === selectedAnswer;
+  }
 
-    if (showResult) {
-      if (option.isCorrect) {
-        return baseClass + 'bg-success-100 border-success-500 font-bold';
-      }
-      if (index === selectedAnswer && !option.isCorrect) {
-        return baseClass + 'bg-danger-100 border-danger-500 font-bold';
-      }
-      return baseClass + 'bg-gray-100 border-gray-300 opacity-50';
-    }
+  function isCorrectAnswer(option: QCMOption): boolean {
+    return showResult && option.isCorrect;
+  }
 
-    if (index === selectedAnswer) {
-      return baseClass + 'bg-primary-200 border-primary-600 border-8 text-primary-800 font-bold shadow-2xl ring-4 ring-primary-300 scale-[1.02]';
-    }
-
-    return baseClass + 'bg-white border-gray-300 hover:bg-gray-50 hover:border-gray-400';
+  function isIncorrectAnswer(index: number, option: QCMOption): boolean {
+    return showResult && index === selectedAnswer && !option.isCorrect;
   }
 
   function getOptionIcon(index: number, option: QCMOption): string {
@@ -60,7 +51,27 @@
     {#each options as option, index}
       <button
         on:click={() => handleSelect(index)}
-        class={getOptionClass(index, option)}
+        class="w-full rounded-xl p-4 text-left text-lg transition-all duration-300 cursor-pointer"
+        class:border-4={!isSelected(index) || showResult}
+        class:border-8={isSelected(index) && !showResult}
+        class:bg-white={!isSelected(index) && !showResult}
+        class:border-gray-300={!isSelected(index) && !showResult}
+        class:hover:bg-gray-50={!isSelected(index) && !showResult}
+        class:hover:border-gray-400={!isSelected(index) && !showResult}
+        class:bg-primary-200={isSelected(index) && !showResult}
+        class:border-primary-600={isSelected(index) && !showResult}
+        class:text-primary-800={isSelected(index) && !showResult}
+        class:font-bold={isSelected(index) || showResult}
+        class:shadow-2xl={isSelected(index) && !showResult}
+        class:ring-4={isSelected(index) && !showResult}
+        class:ring-primary-300={isSelected(index) && !showResult}
+        class:scale-[1.02]={isSelected(index) && !showResult}
+        class:bg-success-100={isCorrectAnswer(option)}
+        class:border-success-500={isCorrectAnswer(option)}
+        class:bg-danger-100={isIncorrectAnswer(index, option)}
+        class:border-danger-500={isIncorrectAnswer(index, option)}
+        class:bg-gray-100={showResult && !option.isCorrect && index !== selectedAnswer}
+        class:opacity-50={showResult && !option.isCorrect && index !== selectedAnswer}
         disabled={showResult}
       >
         <span class="flex items-center justify-between">
