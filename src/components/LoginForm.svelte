@@ -9,8 +9,8 @@
   function handleSubmit() {
     if (prenom.trim()) {
       setUser({ prenom: prenom.trim(), classe });
-      // Redirection vers la page de sélection
-      window.location.href = `${import.meta.env.BASE_URL}selection`;
+      // Redirection vers la page de choix de matière
+      window.location.href = `${import.meta.env.BASE_URL}matieres`;
     }
   }
 </script>

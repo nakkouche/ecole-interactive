@@ -1,0 +1,79 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { loadAllQCMs, getMatieres } from '../lib/qcmParser';
+
+// Charger tous les QCM disponibles
+const allQCMs = await loadAllQCMs();
+const matieres = getMatieres(allQCMs);
+
+// Compter les QCM par matière
+const qcmsByMatiere = matieres.map((matiere) => ({
+  matiere,
+  count: allQCMs.filter((qcm) => qcm.frontmatter.matiere === matiere).length,
+}));
+
+// Icônes et couleurs par matière
+const matiereConfig: {
+  [key: string]: { icon: string; colorClass: string };
+} = {
+  Mathématiques: { icon: '🔢', colorClass: 'bg-gradient-to-br from-blue-100 to-blue-200 border-blue-300 hover:from-blue-200 hover:to-blue-300' },
+  Français: { icon: '📚', colorClass: 'bg-gradient-to-br from-green-100 to-green-200 border-green-300 hover:from-green-200 hover:to-green-300' },
+  Sciences: { icon: '🔬', colorClass: 'bg-gradient-to-br from-purple-100 to-purple-200 border-purple-300 hover:from-purple-200 hover:to-purple-300' },
+  Histoire: { icon: '🏛️', colorClass: 'bg-gradient-to-br from-orange-100 to-orange-200 border-orange-300 hover:from-orange-200 hover:to-orange-300' },
+  Géographie: { icon: '🌍', colorClass: 'bg-gradient-to-br from-pink-100 to-pink-200 border-pink-300 hover:from-pink-200 hover:to-pink-300' },
+  Anglais: { icon: '🇬🇧', colorClass: 'bg-gradient-to-br from-yellow-100 to-yellow-200 border-yellow-300 hover:from-yellow-200 hover:to-yellow-300' },
+};
+---
+
+<Layout title="École Interactive - Choix de la matière">
+  <div class="mx-auto max-w-6xl">
+    <div class="mb-12 text-center">
+      <h1 class="mb-4 text-5xl font-bold text-gray-800">Quelle matière veux-tu réviser ?</h1>
+      <p class="text-xl text-gray-600">Choisis une matière pour commencer à apprendre !</p>
+    </div>
+
+    <div class="mb-8 text-center">
+      <a
+        href={import.meta.env.BASE_URL}
+        class="inline-block rounded-xl bg-gray-200 px-6 py-3 text-lg font-semibold text-gray-700 transition-all hover:bg-gray-300"
+      >
+        ← Changer d'utilisateur
+      </a>
+    </div>
+
+    {
+      qcmsByMatiere.length === 0 ? (
+        <div class="rounded-3xl bg-white p-12 text-center shadow-lg">
+          <div class="mb-4 text-6xl">📭</div>
+          <h2 class="mb-2 text-3xl font-bold text-gray-800">Aucune matière disponible</h2>
+          <p class="text-xl text-gray-600">
+            Les QCM n'ont pas encore été ajoutés. Consultez le README pour ajouter des QCM.
+          </p>
+        </div>
+      ) : (
+        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {
+            qcmsByMatiere.map(({ matiere, count }) => {
+              const config = matiereConfig[matiere] || {
+                icon: '📖',
+                colorClass: 'bg-gradient-to-br from-gray-100 to-gray-200 border-gray-300 hover:from-gray-200 hover:to-gray-300'
+              };
+              return (
+                <a
+                  href={`${import.meta.env.BASE_URL}selection?matiere=${encodeURIComponent(matiere)}`}
+                  class={`block rounded-3xl border-4 p-8 text-center shadow-lg transition-all hover:scale-105 hover:shadow-xl active:scale-95 ${config.colorClass}`}
+                >
+                  <div class="mb-4 text-7xl">{config.icon}</div>
+                  <h2 class="mb-2 text-3xl font-bold text-gray-800">{matiere}</h2>
+                  <p class="text-lg text-gray-600">
+                    {count} QCM disponible{count > 1 ? 's' : ''}
+                  </p>
+                </a>
+              );
+            })
+          }
+        </div>
+      )
+    }
+  </div>
+</Layout>
