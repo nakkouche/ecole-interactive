@@ -23,7 +23,7 @@
 
   function handleSelectAnswer(answerIndex: number) {
     answers[currentQuestionIndex] = answerIndex;
-    answers = answers; // Trigger reactivity
+    answers = [...answers]; // Trigger reactivity by creating a new array reference
   }
 
   function nextQuestion() {
