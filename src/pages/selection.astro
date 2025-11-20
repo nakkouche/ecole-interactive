@@ -136,15 +136,15 @@ function getDifficultyStars(difficulte: number): string {
         matiereSections.forEach((section) => {
           const matiere = section.getAttribute('data-matiere');
           if (matiere === selectedMatiere) {
-            section.style.display = 'block';
+            (section as HTMLElement).style.display = 'block';
           } else {
-            section.style.display = 'none';
+            (section as HTMLElement).style.display = 'none';
           }
         });
       } else {
         // Afficher toutes les sections si aucune matière n'est sélectionnée
         matiereSections.forEach((section) => {
-          section.style.display = 'block';
+          (section as HTMLElement).style.display = 'block';
         });
       }
     }

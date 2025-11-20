@@ -29,7 +29,7 @@
     }
 
     if (index === selectedAnswer) {
-      return baseClass + 'bg-primary-100 border-primary-500 font-bold shadow-2xl scale-105 transform';
+      return baseClass + 'bg-primary-200 border-primary-600 border-8 text-primary-800 font-bold shadow-2xl ring-4 ring-primary-300 scale-[1.02]';
     }
 
     return baseClass + 'bg-white border-gray-300 hover:bg-gray-50 hover:border-gray-400';
