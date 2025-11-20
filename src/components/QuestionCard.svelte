@@ -29,7 +29,7 @@
     }
 
     if (index === selectedAnswer) {
-      return baseClass + 'bg-primary-200 border-primary-600 font-bold shadow-2xl ring-8 ring-primary-400 ring-offset-4 ring-offset-white';
+      return baseClass + 'bg-primary-100 border-primary-500 font-bold shadow-2xl scale-105 transform';
     }
 
     return baseClass + 'bg-white border-gray-300 hover:bg-gray-50 hover:border-gray-400';
@@ -66,7 +66,7 @@
         <span class="flex items-center justify-between">
           <span>{option.text}</span>
           {#if getOptionIcon(index, option)}
-            <span class="text-2xl">{getOptionIcon(index, option)}</span>
+            <span class="text-3xl font-bold text-primary-600">{getOptionIcon(index, option)}</span>
           {/if}
         </span>
       </button>
