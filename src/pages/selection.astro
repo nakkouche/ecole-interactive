@@ -76,16 +76,17 @@ function getDifficultyStars(difficulte: number): string {
                     <span class="text-5xl">{config.icon}</span>
                     <div>
                       <h2 class="text-3xl font-bold text-gray-800">{matiere}</h2>
-                      <p class="text-lg text-gray-600">{qcms.length} QCM disponible{qcms.length > 1 ? 's' : ''}</p>
+                      <p class="text-lg text-gray-600 qcm-count">{qcms.length} QCM disponible{qcms.length > 1 ? 's' : ''}</p>
                     </div>
                   </div>
 
-                  <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3 qcm-grid">
                     {
                       qcms.map((qcm) => (
                         <a
                           href={`${import.meta.env.BASE_URL}qcm/${qcm.frontmatter.id}`}
-                          class={`block rounded-xl border-4 p-6 transition-all hover:scale-105 active:scale-95 ${config.colorClass}`}
+                          class={`qcm-card block rounded-xl border-4 p-6 transition-all hover:scale-105 active:scale-95 ${config.colorClass}`}
+                          data-niveau={qcm.frontmatter.niveau}
                         >
                           <h3 class="mb-2 text-lg font-bold text-gray-800 line-clamp-2">
                             {qcm.frontmatter.titre}
@@ -118,8 +119,19 @@ function getDifficultyStars(difficulte: number): string {
   </div>
 
   <script>
-    // Filtrage côté client basé sur le paramètre URL
-    function filterByMatiere() {
+    // Filtrage côté client basé sur le paramètre URL et la classe de l'utilisateur
+    function filterQCMs() {
+      // Récupérer la classe de l'utilisateur depuis localStorage
+      const storedUser = localStorage.getItem('ecole_user');
+      if (!storedUser) {
+        // Si pas d'utilisateur connecté, rediriger vers la page d'accueil
+        window.location.href = import.meta.env.BASE_URL;
+        return;
+      }
+
+      const user = JSON.parse(storedUser);
+      const classe = user.classe;
+
       const urlParams = new URLSearchParams(window.location.search);
       const selectedMatiere = urlParams.get('matiere');
 
@@ -127,32 +139,81 @@ function getDifficultyStars(difficulte: number): string {
       const pageSubtitle = document.getElementById('page-subtitle');
       const matiereSections = document.querySelectorAll('.matiere-section');
 
+      // Filtrer par matière (basé sur l'URL)
       if (selectedMatiere) {
         // Mettre à jour le titre et sous-titre
         if (pageTitle) pageTitle.textContent = `QCM de ${selectedMatiere}`;
         if (pageSubtitle) pageSubtitle.textContent = 'Choisis un QCM pour commencer !';
+      }
 
-        // Filtrer les sections de matières
-        matiereSections.forEach((section) => {
-          const matiere = section.getAttribute('data-matiere');
-          if (matiere === selectedMatiere) {
+      // Filtrer les QCMs par classe
+      matiereSections.forEach((section) => {
+        const matiere = section.getAttribute('data-matiere');
+        const shouldShowSection = !selectedMatiere || matiere === selectedMatiere;
+
+        if (shouldShowSection) {
+          // Filtrer les QCMs dans cette section par niveau
+          const qcmCards = section.querySelectorAll('.qcm-card');
+          let visibleCount = 0;
+
+          qcmCards.forEach((card) => {
+            const niveau = card.getAttribute('data-niveau');
+            if (niveau === classe) {
+              (card as HTMLElement).style.display = 'block';
+              visibleCount++;
+            } else {
+              (card as HTMLElement).style.display = 'none';
+            }
+          });
+
+          // Mettre à jour le compteur de QCMs
+          const countElement = section.querySelector('.qcm-count');
+          if (countElement) {
+            countElement.textContent = `${visibleCount} QCM disponible${visibleCount > 1 ? 's' : ''}`;
+          }
+
+          // Afficher ou cacher la section selon qu'elle contient des QCMs pour cette classe
+          if (visibleCount > 0) {
             (section as HTMLElement).style.display = 'block';
           } else {
             (section as HTMLElement).style.display = 'none';
           }
-        });
-      } else {
-        // Afficher toutes les sections si aucune matière n'est sélectionnée
-        matiereSections.forEach((section) => {
-          (section as HTMLElement).style.display = 'block';
-        });
+        } else {
+          (section as HTMLElement).style.display = 'none';
+        }
+      });
+
+      // Vérifier s'il reste des sections visibles
+      const visibleSections = Array.from(matiereSections).filter(
+        (section) => (section as HTMLElement).style.display !== 'none'
+      );
+
+      if (visibleSections.length === 0) {
+        const container = document.getElementById('qcms-container');
+        if (container) {
+          container.innerHTML = `
+            <div class="rounded-3xl bg-white p-12 text-center shadow-lg">
+              <div class="mb-4 text-6xl">📭</div>
+              <h2 class="mb-2 text-3xl font-bold text-gray-800">Aucun QCM disponible pour ${classe}</h2>
+              <p class="text-xl text-gray-600">
+                Il n'y a pas de QCM disponibles pour la classe ${classe}${selectedMatiere ? ` en ${selectedMatiere}` : ''}.
+              </p>
+              <a
+                href="${import.meta.env.BASE_URL}matieres"
+                class="mt-6 inline-block rounded-xl bg-blue-500 px-6 py-3 text-lg font-semibold text-white transition-all hover:bg-blue-600"
+              >
+                Retour aux matières
+              </a>
+            </div>
+          `;
+        }
       }
     }
 
     // Exécuter le filtrage au chargement de la page
-    filterByMatiere();
+    filterQCMs();
 
     // Ré-exécuter si l'URL change (navigation avec le bouton retour/avancer)
-    window.addEventListener('popstate', filterByMatiere);
+    window.addEventListener('popstate', filterQCMs);
   </script>
 </Layout>

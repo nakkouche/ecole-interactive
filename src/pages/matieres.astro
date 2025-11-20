@@ -6,11 +6,24 @@ import { loadAllQCMs, getMatieres } from '../lib/qcmParser';
 const allQCMs = await loadAllQCMs();
 const matieres = getMatieres(allQCMs);
 
-// Compter les QCM par matière
-const qcmsByMatiere = matieres.map((matiere) => ({
-  matiere,
-  count: allQCMs.filter((qcm) => qcm.frontmatter.matiere === matiere).length,
-}));
+// Compter les QCM par matière et par niveau
+const qcmsByMatiere = matieres.map((matiere) => {
+  const qcmsForMatiere = allQCMs.filter((qcm) => qcm.frontmatter.matiere === matiere);
+  const niveaux = [...new Set(qcmsForMatiere.map((qcm) => qcm.frontmatter.niveau))];
+
+  return {
+    matiere,
+    count: qcmsForMatiere.length,
+    niveaux: niveaux,
+    countByNiveau: {
+      CP: qcmsForMatiere.filter((qcm) => qcm.frontmatter.niveau === 'CP').length,
+      CE1: qcmsForMatiere.filter((qcm) => qcm.frontmatter.niveau === 'CE1').length,
+      CE2: qcmsForMatiere.filter((qcm) => qcm.frontmatter.niveau === 'CE2').length,
+      CM1: qcmsForMatiere.filter((qcm) => qcm.frontmatter.niveau === 'CM1').length,
+      CM2: qcmsForMatiere.filter((qcm) => qcm.frontmatter.niveau === 'CM2').length,
+    }
+  };
+});
 
 // Icônes et couleurs par matière
 const matiereConfig: {
@@ -51,9 +64,9 @@ const matiereConfig: {
           </p>
         </div>
       ) : (
-        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3" id="matieres-grid">
           {
-            qcmsByMatiere.map(({ matiere, count }) => {
+            qcmsByMatiere.map(({ matiere, count, niveaux, countByNiveau }) => {
               const config = matiereConfig[matiere] || {
                 icon: '📖',
                 colorClass: 'bg-gradient-to-br from-gray-100 to-gray-200 border-gray-300 hover:from-gray-200 hover:to-gray-300'
@@ -61,11 +74,18 @@ const matiereConfig: {
               return (
                 <a
                   href={`${import.meta.env.BASE_URL}selection?matiere=${encodeURIComponent(matiere)}`}
-                  class={`block rounded-3xl border-4 p-8 text-center shadow-lg transition-all hover:scale-105 hover:shadow-xl active:scale-95 ${config.colorClass}`}
+                  class={`matiere-card block rounded-3xl border-4 p-8 text-center shadow-lg transition-all hover:scale-105 hover:shadow-xl active:scale-95 ${config.colorClass}`}
+                  data-matiere={matiere}
+                  data-niveaux={JSON.stringify(niveaux)}
+                  data-count-cp={countByNiveau.CP}
+                  data-count-ce1={countByNiveau.CE1}
+                  data-count-ce2={countByNiveau.CE2}
+                  data-count-cm1={countByNiveau.CM1}
+                  data-count-cm2={countByNiveau.CM2}
                 >
                   <div class="mb-4 text-7xl">{config.icon}</div>
                   <h2 class="mb-2 text-3xl font-bold text-gray-800">{matiere}</h2>
-                  <p class="text-lg text-gray-600">
+                  <p class="text-lg text-gray-600 matiere-count">
                     {count} QCM disponible{count > 1 ? 's' : ''}
                   </p>
                 </a>
@@ -76,4 +96,65 @@ const matiereConfig: {
       )
     }
   </div>
+
+  <script>
+    // Filtrage des matières par classe de l'utilisateur
+    function filterMatieresByClasse() {
+      // Récupérer la classe de l'utilisateur depuis localStorage
+      const storedUser = localStorage.getItem('ecole_user');
+      if (!storedUser) {
+        // Si pas d'utilisateur connecté, rediriger vers la page d'accueil
+        window.location.href = import.meta.env.BASE_URL;
+        return;
+      }
+
+      const user = JSON.parse(storedUser);
+      const classe = user.classe;
+
+      // Récupérer toutes les cartes de matières
+      const matiereCards = document.querySelectorAll('.matiere-card');
+      let visibleCount = 0;
+
+      matiereCards.forEach((card) => {
+        const countAttr = `data-count-${classe.toLowerCase()}`;
+        const count = parseInt(card.getAttribute(countAttr) || '0');
+
+        if (count > 0) {
+          // Afficher la carte et mettre à jour le compteur
+          (card as HTMLElement).style.display = 'block';
+          const countElement = card.querySelector('.matiere-count');
+          if (countElement) {
+            countElement.textContent = `${count} QCM disponible${count > 1 ? 's' : ''}`;
+          }
+          visibleCount++;
+        } else {
+          // Cacher la carte si aucun QCM disponible pour cette classe
+          (card as HTMLElement).style.display = 'none';
+        }
+      });
+
+      // Afficher un message si aucune matière n'est disponible pour cette classe
+      const grid = document.getElementById('matieres-grid');
+      if (grid && visibleCount === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full rounded-3xl bg-white p-12 text-center shadow-lg">
+            <div class="mb-4 text-6xl">📭</div>
+            <h2 class="mb-2 text-3xl font-bold text-gray-800">Aucune matière disponible pour ${classe}</h2>
+            <p class="text-xl text-gray-600">
+              Il n'y a pas encore de QCM disponibles pour la classe ${classe}.
+            </p>
+            <a
+              href="${import.meta.env.BASE_URL}"
+              class="mt-6 inline-block rounded-xl bg-blue-500 px-6 py-3 text-lg font-semibold text-white transition-all hover:bg-blue-600"
+            >
+              Changer de classe
+            </a>
+          </div>
+        `;
+      }
+    }
+
+    // Exécuter le filtrage au chargement de la page
+    filterMatieresByClasse();
+  </script>
 </Layout>
