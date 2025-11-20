@@ -24,8 +24,3 @@ pnpm-debug.log*
 
 # VS Code
 .vscode/
-
-# lock files
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
