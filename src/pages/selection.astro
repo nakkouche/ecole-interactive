@@ -2,23 +2,14 @@
 import Layout from '../layouts/Layout.astro';
 import { loadAllQCMs, getMatieres } from '../lib/qcmParser';
 
-// Récupérer la matière sélectionnée depuis l'URL
-const selectedMatiere = Astro.url.searchParams.get('matiere');
-
 // Charger tous les QCM disponibles
 const allQCMs = await loadAllQCMs();
-
-// Filtrer les QCM par matière si une matière est sélectionnée
-const filteredQCMs = selectedMatiere
-  ? allQCMs.filter((qcm) => qcm.frontmatter.matiere === selectedMatiere)
-  : allQCMs;
-
-const matieres = selectedMatiere ? [selectedMatiere] : getMatieres(allQCMs);
+const matieres = getMatieres(allQCMs);
 
 // Grouper les QCM par matière
 const qcmsByMatiere = matieres.map((matiere) => ({
   matiere,
-  qcms: filteredQCMs.filter((qcm) => qcm.frontmatter.matiere === matiere),
+  qcms: allQCMs.filter((qcm) => qcm.frontmatter.matiere === matiere),
 }));
 
 // Icônes et couleurs par matière
@@ -39,14 +30,14 @@ function getDifficultyStars(difficulte: number): string {
 }
 ---
 
-<Layout title={`École Interactive - ${selectedMatiere || 'Sélection'}`}>
+<Layout title="École Interactive - Sélection">
   <div class="mx-auto max-w-6xl">
     <div class="mb-12 text-center">
-      <h1 class="mb-4 text-5xl font-bold text-gray-800">
-        {selectedMatiere ? `QCM de ${selectedMatiere}` : 'Quelle matière veux-tu réviser ?'}
+      <h1 id="page-title" class="mb-4 text-5xl font-bold text-gray-800">
+        Quelle matière veux-tu réviser ?
       </h1>
-      <p class="text-xl text-gray-600">
-        {selectedMatiere ? 'Choisis un QCM pour commencer !' : 'Choisis une matière pour commencer à apprendre !'}
+      <p id="page-subtitle" class="text-xl text-gray-600">
+        Choisis une matière pour commencer à apprendre !
       </p>
     </div>
 
@@ -75,12 +66,12 @@ function getDifficultyStars(difficulte: number): string {
           </p>
         </div>
       ) : (
-        <div class="space-y-10">
+        <div id="qcms-container" class="space-y-10">
           {
             qcmsByMatiere.map(({ matiere, qcms }) => {
               const config = matiereConfig[matiere] || { icon: '📖', colorClass: 'bg-gray-100 border-gray-300 hover:bg-gray-200' };
               return (
-                <div class="rounded-3xl bg-white p-8 shadow-lg">
+                <div class="matiere-section rounded-3xl bg-white p-8 shadow-lg" data-matiere={matiere}>
                   <div class="mb-6 flex items-center gap-4">
                     <span class="text-5xl">{config.icon}</span>
                     <div>
@@ -125,4 +116,43 @@ function getDifficultyStars(difficulte: number): string {
       )
     }
   </div>
+
+  <script>
+    // Filtrage côté client basé sur le paramètre URL
+    function filterByMatiere() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const selectedMatiere = urlParams.get('matiere');
+
+      const pageTitle = document.getElementById('page-title');
+      const pageSubtitle = document.getElementById('page-subtitle');
+      const matiereSections = document.querySelectorAll('.matiere-section');
+
+      if (selectedMatiere) {
+        // Mettre à jour le titre et sous-titre
+        if (pageTitle) pageTitle.textContent = `QCM de ${selectedMatiere}`;
+        if (pageSubtitle) pageSubtitle.textContent = 'Choisis un QCM pour commencer !';
+
+        // Filtrer les sections de matières
+        matiereSections.forEach((section) => {
+          const matiere = section.getAttribute('data-matiere');
+          if (matiere === selectedMatiere) {
+            section.style.display = 'block';
+          } else {
+            section.style.display = 'none';
+          }
+        });
+      } else {
+        // Afficher toutes les sections si aucune matière n'est sélectionnée
+        matiereSections.forEach((section) => {
+          section.style.display = 'block';
+        });
+      }
+    }
+
+    // Exécuter le filtrage au chargement de la page
+    filterByMatiere();
+
+    // Ré-exécuter si l'URL change (navigation avec le bouton retour/avancer)
+    window.addEventListener('popstate', filterByMatiere);
+  </script>
 </Layout>
