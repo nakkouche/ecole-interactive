@@ -39,9 +39,6 @@ jobs:
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v5
-        with:
-          enablement: true
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build with Astro
         run: |
