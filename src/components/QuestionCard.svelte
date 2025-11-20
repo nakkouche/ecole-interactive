@@ -58,13 +58,13 @@
         class:border-gray-300={!isSelected(index) && !showResult}
         class:hover:bg-gray-50={!isSelected(index) && !showResult}
         class:hover:border-gray-400={!isSelected(index) && !showResult}
-        class:bg-primary-200={isSelected(index) && !showResult}
-        class:border-primary-600={isSelected(index) && !showResult}
-        class:text-primary-800={isSelected(index) && !showResult}
+        class:bg-secondary-200={isSelected(index) && !showResult}
+        class:border-secondary-600={isSelected(index) && !showResult}
+        class:text-secondary-800={isSelected(index) && !showResult}
         class:font-bold={isSelected(index) || showResult}
         class:shadow-2xl={isSelected(index) && !showResult}
         class:ring-4={isSelected(index) && !showResult}
-        class:ring-primary-300={isSelected(index) && !showResult}
+        class:ring-secondary-300={isSelected(index) && !showResult}
         class:scale-[1.02]={isSelected(index) && !showResult}
         class:bg-success-100={isCorrectAnswer(option)}
         class:border-success-500={isCorrectAnswer(option)}
@@ -77,7 +77,7 @@
         <span class="flex items-center justify-between">
           <span>{option.text}</span>
           {#if getOptionIcon(index, option)}
-            <span class="text-3xl font-bold text-primary-600">{getOptionIcon(index, option)}</span>
+            <span class="text-3xl font-bold text-secondary-600">{getOptionIcon(index, option)}</span>
           {/if}
         </span>
       </button>
